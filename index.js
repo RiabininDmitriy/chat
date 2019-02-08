@@ -7,15 +7,16 @@ window.onload = () => {
             method: "POST",
             body: JSON.stringify(data),
             headers: {
-                "Content-type": "application/json"
+                "Content-type": "application/x-www-form-urlencoded"
             }
-        }
+        })
+            .then((res) => res.json())
+    }
 
     async function sendMessage(nick, message) {
-                var data = { func: "addMessage", nick: nick, message: message, author: 'chat' };
-                await sendData(data)
-                getMessages();
-        );
+        var data = { func: "addMessage", nick: nick, message: message, author: 'chat' };
+        await sendData(data)
+        getMessages()
     }
 
     function cleanUp(text) {
@@ -31,33 +32,32 @@ window.onload = () => {
 
     async function getMessages() {
         var data = { func: "getMessages", messageId: nextMessageId, author: 'chat' };
-        await sendData(data)
-        for (var msgIndex in data.data) {
-            msg = data.data[msgIndex]
-            msgDiv = document.getElementsByTagName("div")
-                let bTagNick = document.body.appendChild(
-                    document.createElement('b')
-                        bTagNick.innerText = msg.nick
+        let motherData = await sendData(data)
+        for (var msgIndex in motherData.data) {
+            msg = motherData.data[msgIndex]
+            let chat = document.getElementById('chat')
+            msgDiv = document.createElement("div")
+            chat.insertBefore(msgDiv, chat.firstChild);
 
-                    let bTagMessage = ocument.body.appendChild(
-                        document.createElement('b')
-                        bTagMessage.innerText = msg.message
-                    ))
-            }
+            let bTagNick = document.createElement('b')
+            bTagNick.innerText = cleanUp(msg.nick)
+            msgDiv.appendChild(bTagNick)
+            msgDiv.innerText = cleanUp(msg.message)
         }
-        nextMessageId = data.nextMessageId;
+        nextMessageId = motherData.nextMessageId;
     }
-}
 
 let send = document.getElementById('send')
 
-send.onclick = (async function () {
+send.onclick = async function () {
     var nick = document.getElementById('nick')
     nick = nick.value
-    var message = document.getElementById('message')
-    message = msg.value
+    var message = document.getElementById('msg')
+    message = message.value
+    
     await sendMessage(nick, message);
-});
+};
 getMessages();
 
 setInterval(getMessages, 2000)
+}
